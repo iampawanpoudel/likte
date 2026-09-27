@@ -1,0 +1,1592 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Likte</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ── Reset & Tokens ─────────────────────────────────── */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #f5f7fb;
+        --surface: #ffffff;
+        --surface2: #f7f9fc;
+        --surface3: #edf2f8;
+        --border: #dce3ed;
+        --border-hover: #b7c5d8;
+        --text: #172033;
+        --text2: #536178;
+        --text3: #738096;
+        --accent: #2858c6;
+        --accent-hover: #1d48ad;
+        --accent-soft: #eaf0ff;
+        --green: #16794d;
+        --green-bg: #e8f7ef;
+        --red: #c13f4a;
+        --red-bg: #fff0f1;
+        --amber: #9a6310;
+        --amber-bg: #fff6e6;
+        --radius: 16px;
+        --radius-sm: 11px;
+        --radius-xs: 8px;
+        --font: "Inter", system-ui, -apple-system, sans-serif;
+        --transition:
+          background-color 0.15s ease, border-color 0.15s ease,
+          color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: var(--font);
+        background:
+          radial-gradient(circle at 100% 0, #dce8ff 0, transparent 32%),
+          linear-gradient(135deg, #f9fbff 0%, var(--bg) 58%, #eef4f0 100%);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      /* ── Container ──────────────────────────────────────── */
+      .app {
+        width: min(100%, 1080px);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid rgba(199, 211, 228, 0.86);
+        border-radius: 22px;
+        box-shadow:
+          0 24px 60px rgba(35, 57, 91, 0.13),
+          0 2px 7px rgba(35, 57, 91, 0.05);
+        backdrop-filter: blur(16px);
+      }
+
+      /* ── Header ─────────────────────────────────────────── */
+      .header {
+        padding: 28px 32px 0;
+        flex-shrink: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .header h1 {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        color: var(--text);
+      }
+      .header p {
+        color: var(--text2);
+        font-size: 13px;
+        margin-top: 7px;
+        line-height: 1.5;
+      }
+      .header-mark {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .header-mark svg {
+        width: 15px;
+        height: 15px;
+        stroke: currentColor;
+        stroke-width: 2;
+        fill: none;
+      }
+
+      /* ── Main scrollable area ───────────────────────────── */
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 28px 32px 32px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+      .content::-webkit-scrollbar {
+        width: 6px;
+      }
+      .content::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .content::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+
+      /* ── Views ──────────────────────────────────────────── */
+      .view {
+        display: none;
+        max-width: 940px;
+        margin: 0 auto;
+      }
+      .view.active {
+        display: block;
+      }
+
+      /* ── Drop Zone ──────────────────────────────────────── */
+      .dropzone {
+        width: 100%;
+        border: 1.5px dashed #a9bce0;
+        border-radius: var(--radius);
+        padding: 38px 24px 36px;
+        text-align: center;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+        transition: var(--transition);
+        background: linear-gradient(135deg, #fbfdff, #f2f6ff);
+        position: relative;
+        overflow: hidden;
+      }
+      .dropzone::before {
+        content: "";
+        position: absolute;
+        width: 190px;
+        height: 190px;
+        border-radius: 50%;
+        background: rgba(67, 119, 226, 0.09);
+        top: -118px;
+        right: -38px;
+        pointer-events: none;
+      }
+      @media (hover: hover) {
+        .dropzone:hover {
+          border-color: var(--accent);
+          background: #f5f8ff;
+          box-shadow: 0 10px 24px rgba(51, 89, 167, 0.09);
+        }
+      }
+      .dropzone.dragover {
+        border-color: var(--accent);
+        border-style: solid;
+        background: #eaf0ff;
+        box-shadow: inset 0 0 0 3px rgba(40, 88, 198, 0.09);
+      }
+      .dropzone.busy {
+        opacity: 0.68;
+        cursor: wait;
+      }
+      .dropzone-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 14px;
+        background: var(--surface);
+        color: var(--accent);
+        box-shadow: 0 6px 18px rgba(51, 89, 167, 0.13);
+        position: relative;
+      }
+      .dropzone-icon svg {
+        width: 23px;
+        height: 23px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .dropzone-text {
+        display: block;
+        font-size: 15px;
+        color: var(--text2);
+        position: relative;
+        line-height: 1.5;
+      }
+      .dropzone-text strong {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .dropzone-sub {
+        display: block;
+        font-size: 12px;
+        color: var(--text3);
+        margin-top: 8px;
+        position: relative;
+      }
+
+      /* ── File List ──────────────────────────────────────── */
+      .file-list {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .file-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 12px 14px;
+        transition: var(--transition);
+        box-shadow: 0 1px 2px rgba(23, 32, 51, 0.02);
+      }
+      @media (hover: hover) {
+        .file-item:hover {
+          border-color: var(--border-hover);
+          box-shadow: 0 5px 14px rgba(35, 57, 91, 0.05);
+        }
+      }
+      .file-type {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: #edf3ff;
+        color: var(--accent);
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+      .file-type svg {
+        width: 17px;
+        height: 17px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .file-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .file-name {
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .file-meta {
+        font-size: 12px;
+        color: var(--text3);
+        margin-top: 4px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .file-remove {
+        background: none;
+        border: none;
+        color: var(--text3);
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0;
+        border-radius: 50%;
+        transition: var(--transition);
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+      }
+      @media (hover: hover) {
+        .file-remove:hover {
+          color: var(--red);
+          background: var(--red-bg);
+        }
+      }
+      .selection-summary {
+        font-size: 12px;
+        color: var(--text3);
+        margin: 14px 2px -4px;
+      }
+
+      /* ── Controls ───────────────────────────────────────── */
+      .controls {
+        margin-top: 24px;
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        align-items: end;
+        padding: 18px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+      .control-group {
+        flex: 1;
+        min-width: 220px;
+      }
+      .control-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text2);
+        margin-bottom: 8px;
+      }
+      select {
+        width: 100%;
+        padding: 10px 14px;
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-family: var(--font);
+        cursor: pointer;
+        transition: var(--transition);
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+      }
+      @media (hover: hover) {
+        select:hover {
+          border-color: var(--border-hover);
+        }
+      }
+
+      .output-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .output-path {
+        flex: 1;
+        padding: 10px 14px;
+        background: var(--surface);
+        color: var(--text2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+      }
+      .btn-browse {
+        padding: 10px 16px;
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-family: var(--font);
+        cursor: pointer;
+        transition: var(--transition);
+        white-space: nowrap;
+        flex-shrink: 0;
+        width: auto;
+        font-weight: 500;
+      }
+      @media (hover: hover) {
+        .btn-browse:hover {
+          border-color: var(--border-hover);
+          background: var(--surface3);
+        }
+      }
+
+      /* ── Buttons ────────────────────────────────────────── */
+      .actions {
+        margin-top: 24px;
+        display: flex;
+        gap: 12px;
+      }
+      .btn {
+        min-height: 42px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 500;
+        font-family: var(--font);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        border: 1px solid var(--accent);
+        box-shadow: 0 4px 10px rgba(40, 88, 198, 0.2);
+      }
+      @media (hover: hover) {
+        .btn-primary:hover {
+          background: var(--accent-hover);
+          border-color: var(--accent-hover);
+          box-shadow: 0 6px 14px rgba(40, 88, 198, 0.25);
+        }
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-secondary {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      @media (hover: hover) {
+        .btn-secondary:hover {
+          border-color: var(--border-hover);
+          background: var(--surface3);
+        }
+      }
+      .btn-danger {
+        background: var(--surface);
+        color: var(--red);
+        border: 1px solid #f1ccd0;
+      }
+      @media (hover: hover) {
+        .btn-danger:hover {
+          border-color: var(--red);
+          background: var(--red-bg);
+        }
+      }
+      .btn-full {
+        width: 100%;
+      }
+
+      /* ── Progress View ──────────────────────────────────── */
+      .progress-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 22px rgba(35, 57, 91, 0.05);
+      }
+
+      .batch-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .batch-label {
+        font-size: 13px;
+        color: var(--text2);
+      }
+      .batch-label strong {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .batch-dots {
+        display: flex;
+        gap: 6px;
+        flex: 1;
+        justify-content: center;
+      }
+      .batch-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--border);
+        transition: var(--transition);
+      }
+      .batch-dot.done {
+        background: var(--text2);
+      }
+      .batch-dot.active {
+        background: var(--accent);
+      }
+      .batch-dot.error {
+        background: var(--red);
+      }
+      .batch-dot.larger {
+        background: var(--amber);
+      }
+
+      .current-file {
+        margin-bottom: 16px;
+      }
+      .current-file h3 {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+      .current-file .stage {
+        font-size: 13px;
+        color: var(--text2);
+      }
+
+      .progress-bar-wrap {
+        height: 4px;
+        background: var(--surface2);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+      .progress-bar-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 2px;
+        transition: width 0.2s ease;
+        background: var(--accent);
+      }
+
+      .progress-pct {
+        font-size: 24px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+        color: var(--text);
+      }
+
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        margin-top: 24px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+      }
+      .stat {
+        background: var(--surface);
+        padding: 12px 16px;
+      }
+      .stat-label {
+        font-size: 12px;
+        color: var(--text2);
+        margin-bottom: 4px;
+      }
+      .stat-value {
+        font-size: 14px;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        color: var(--text);
+      }
+
+      .cancel-row {
+        margin-top: 16px;
+        display: flex;
+        justify-content: center;
+      }
+
+      /* ── Result View ────────────────────────────────────── */
+      .result-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 22px rgba(35, 57, 91, 0.05);
+      }
+      .result-header {
+        margin-bottom: 24px;
+      }
+      .result-header h2 {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .result-header p {
+        font-size: 13px;
+        color: var(--text2);
+        margin-top: 4px;
+      }
+
+      .result-summary {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1px;
+        margin-bottom: 24px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+      }
+      .result-stat {
+        background: var(--surface);
+        padding: 16px;
+      }
+      .result-stat .label {
+        font-size: 12px;
+        color: var(--text2);
+        margin-bottom: 4px;
+      }
+      .result-stat .value {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text);
+      }
+
+      .result-files {
+        margin-top: 24px;
+      }
+      .result-file {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 0;
+        border-top: 1px solid var(--border);
+      }
+      .result-file:first-child {
+        border-top: none;
+        padding-top: 0;
+      }
+      .result-file:last-child {
+        padding-bottom: 0;
+      }
+      .result-file-name {
+        flex: 1;
+        font-size: 13px;
+        font-weight: 400;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text);
+      }
+      .result-file-sizes {
+        font-size: 13px;
+        color: var(--text2);
+        white-space: nowrap;
+      }
+      .result-file-badge {
+        font-size: 12px;
+        font-weight: 500;
+        white-space: nowrap;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .result-file-badge.success {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .result-file-badge.kept {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .result-file-badge.error {
+        background: var(--red-bg);
+        color: var(--red);
+      }
+
+      .result-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      /* ── Error Banner ───────────────────────────────────── */
+      .error-banner {
+        background: var(--red-bg);
+        border: 1px solid #efc5ca;
+        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        margin-top: 16px;
+        font-size: 13px;
+        color: var(--red);
+        display: none;
+        align-items: center;
+        gap: 12px;
+      }
+      .error-banner.visible {
+        display: flex;
+      }
+      .error-banner .dismiss {
+        background: none;
+        border: none;
+        color: var(--red);
+        cursor: pointer;
+        font-size: 14px;
+        margin-left: auto;
+        padding: 4px;
+        width: auto;
+      }
+
+      /* ── FFmpeg Warning ─────────────────────────────────── */
+      .ffmpeg-warning {
+        background: var(--amber-bg);
+        border: 1px solid #efd5a6;
+        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        margin-bottom: 24px;
+        font-size: 13px;
+        color: var(--amber);
+        display: none;
+        align-items: center;
+        gap: 12px;
+      }
+      .ffmpeg-warning.visible {
+        display: flex;
+      }
+
+      /* ── Responsive ─────────────────────────────────────── */
+      @media (max-width: 700px) {
+        body {
+          padding: 0;
+        }
+        .app {
+          width: 100%;
+          border-radius: 0;
+          border: none;
+        }
+        .header {
+          padding: 24px 24px 0;
+        }
+        .content {
+          padding: 20px 24px 24px;
+        }
+        .stats-row {
+          grid-template-columns: 1fr 1fr;
+        }
+        .stats-row .stat:last-child {
+          grid-column: 1/-1;
+        }
+        .result-summary {
+          grid-template-columns: 1fr 1fr;
+        }
+        .controls {
+          flex-direction: column;
+        }
+        .control-group {
+          min-width: 100%;
+        }
+      }
+      @media (max-width: 500px) {
+        .stats-row {
+          grid-template-columns: 1fr;
+        }
+        .result-summary {
+          grid-template-columns: 1fr;
+        }
+        .result-actions {
+          flex-direction: column;
+        }
+      }
+      button:focus-visible,
+      select:focus-visible {
+        outline: 3px solid rgba(40, 88, 198, 0.35);
+        outline-offset: 2px;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .btn:active:not(:disabled),
+        .btn-browse:active,
+        .file-remove:active {
+          transform: scale(0.96);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="header">
+        <div>
+          <h1>Likte</h1>
+          <p>Reduce video file size while maintaining good visual quality.</p>
+        </div>
+        <div class="header-mark" aria-label="Files stay on your device">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <rect x="5" y="10" width="14" height="10" rx="2" />
+            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+          </svg>
+          Works Locally
+        </div>
+      </div>
+
+      <main id="mainContent" class="content">
+        <!-- FFmpeg warning (shown if FFmpeg is not found) -->
+        <div id="ffmpegWarn" class="ffmpeg-warning">
+          <span
+            >FFmpeg was not found. Please install FFmpeg or place binaries in
+            the ffmpeg/ folder.</span
+          >
+        </div>
+
+        <!-- ═══ SELECT VIEW ═══ -->
+        <div id="viewSelect" class="view active">
+          <button
+            id="dropzone"
+            class="dropzone"
+            type="button"
+            aria-describedby="dropzoneHelp"
+          >
+            <span class="dropzone-icon" aria-hidden="true"
+              ><svg viewBox="0 0 24 24">
+                <path d="M12 16V4m0 0-4 4m4-4 4 4" />
+                <path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" /></svg
+            ></span>
+            <span class="dropzone-text"
+              ><strong>Choose videos</strong> or drop them here</span
+            >
+            <span id="dropzoneHelp" class="dropzone-sub"
+              >MP4, MOV, MKV, WebM, M4V, and AVI &middot; multiple files
+              supported</span
+            >
+          </button>
+
+          <div id="fileList" class="file-list"></div>
+          <p
+            id="fileSummary"
+            class="selection-summary"
+            role="status"
+            aria-live="polite"
+          ></p>
+
+          <div id="controlsArea" class="controls" style="display: none">
+            <div class="control-group">
+              <label for="preset">Compression Quality</label>
+              <select id="preset">
+                <option value="high">
+                  High · highest visual quality, modest reduction
+                </option>
+                <option value="balanced" selected>
+                  Balanced · quality and size savings
+                </option>
+                <option value="low">
+                  Low · smallest file, stronger compression
+                </option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="outputBrowse">Output Folder</label>
+              <div class="output-row">
+                <div id="outputPath" class="output-path" aria-live="polite">
+                  Same as source
+                </div>
+                <button
+                  id="outputBrowse"
+                  class="btn-browse"
+                  type="button"
+                  onclick="selectOutputFolder()"
+                >
+                  Browse
+                </button>
+                <button
+                  class="btn-browse"
+                  type="button"
+                  onclick="resetOutputFolder()"
+                  title="Reset to same as source"
+                  aria-label="Use the source folder"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="errorBanner" class="error-banner" role="alert">
+            <span id="errorText"></span>
+            <button
+              class="dismiss"
+              type="button"
+              onclick="hideError()"
+              aria-label="Dismiss message"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div class="actions" id="selectActions" style="display: none">
+            <button
+              class="btn btn-primary btn-full"
+              type="button"
+              id="btnStart"
+              onclick="startCompression()"
+            >
+              Start Compression
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══ PROGRESS VIEW ═══ -->
+        <div id="viewProgress" class="view">
+          <div class="progress-card">
+            <!-- Batch indicator (shown for multiple files) -->
+            <div id="batchBar" class="batch-bar" style="display: none">
+              <div class="batch-label">
+                File <strong id="batchCurrent">1</strong> of
+                <strong id="batchTotal">1</strong>
+              </div>
+              <div id="batchDots" class="batch-dots"></div>
+            </div>
+
+            <div class="current-file">
+              <h3 id="currentFileName">video.mp4</h3>
+              <div id="currentStage" class="stage">Preparing...</div>
+            </div>
+
+            <div
+              class="progress-bar-wrap"
+              id="progressBar"
+              role="progressbar"
+              aria-label="Compression progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div id="progressFill" class="progress-bar-fill"></div>
+            </div>
+
+            <div class="progress-pct" id="progressPct">0%</div>
+
+            <div class="stats-row">
+              <div class="stat">
+                <div class="stat-label">Elapsed</div>
+                <div class="stat-value" id="statElapsed">0s</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Remaining</div>
+                <div class="stat-value" id="statEta">Calculating...</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Speed</div>
+                <div class="stat-value" id="statSpeed">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cancel-row">
+            <button class="btn btn-danger" onclick="cancelCompression()">
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══ RESULT VIEW ═══ -->
+        <div id="viewResult" class="view">
+          <div class="result-card">
+            <div class="result-header">
+              <h2 id="resultTitle">Compression Complete</h2>
+              <p id="resultSubtitle">All files processed successfully.</p>
+            </div>
+
+            <div class="result-summary">
+              <div class="result-stat">
+                <div class="label">Original</div>
+                <div class="value" id="resultOriginal">—</div>
+              </div>
+              <div class="result-stat">
+                <div class="label">Compressed</div>
+                <div class="value accent" id="resultCompressed">—</div>
+              </div>
+              <div class="result-stat">
+                <div class="label">Saved</div>
+                <div class="value green" id="resultSaved">—</div>
+              </div>
+              <div class="result-stat">
+                <div class="label">Time</div>
+                <div class="value" id="resultTime">—</div>
+              </div>
+            </div>
+
+            <div class="result-files" id="resultFiles"></div>
+          </div>
+
+          <div class="result-actions">
+            <button class="btn btn-primary" onclick="openOutputFolder()">
+              Open Output Folder
+            </button>
+            <button class="btn btn-secondary" onclick="compressMore()">
+              Compress More
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      /* ── State ──────────────────────────────────────────── */
+      let selectedFiles = []; // [{path, name, size, size_formatted, width, height, duration, duration_formatted}]
+      let outputDir = null; // null = same as source
+      let pollTimer = null;
+      let batchId = null;
+
+      /* ── Helpers ────────────────────────────────────────── */
+      function formatSize(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+        if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + " MB";
+        return (bytes / 1073741824).toFixed(2) + " GB";
+      }
+
+      function formatTime(sec) {
+        if (sec == null || !isFinite(sec) || sec < 0) return "Calculating...";
+        sec = Math.max(0, Math.round(sec));
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        if (h)
+          return `${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
+        if (m) return `${m}m ${String(s).padStart(2, "0")}s`;
+        return `${s}s`;
+      }
+
+      function showView(id) {
+        document
+          .querySelectorAll(".view")
+          .forEach((v) => v.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+      }
+
+      function showError(msg) {
+        const banner = document.getElementById("errorBanner");
+        document.getElementById("errorText").textContent = msg;
+        banner.classList.add("visible");
+      }
+
+      function hideError() {
+        document.getElementById("errorBanner").classList.remove("visible");
+      }
+
+      /* ── File Selection ─────────────────────────────────── */
+      const dropzone = document.getElementById("dropzone");
+      const fileSummary = document.getElementById("fileSummary");
+      let dragDepth = 0;
+
+      dropzone.addEventListener("click", openFileDialog);
+
+      async function openFileDialog() {
+        if (dropzone.classList.contains("busy")) return;
+        try {
+          const r = await fetch("/select-files", { method: "POST" });
+          const data = await r.json();
+          if (!r.ok)
+            throw new Error(data.error || "Unable to open the file picker.");
+          if (data.files?.length) addFiles(data.files);
+        } catch (e) {
+          showError("Failed to open file dialog: " + e.message);
+        }
+      }
+
+      function hasFiles(e) {
+        return Array.from(e.dataTransfer?.types || []).includes("Files");
+      }
+
+      dropzone.addEventListener("dragover", (e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = "copy";
+        dropzone.classList.add("dragover");
+      });
+
+      dropzone.addEventListener("dragenter", (e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        dragDepth += 1;
+        dropzone.classList.add("dragover");
+      });
+
+      dropzone.addEventListener("dragleave", (e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        dragDepth -= 1;
+        if (dragDepth <= 0) {
+          dragDepth = 0;
+          dropzone.classList.remove("dragover");
+        }
+      });
+
+      dropzone.addEventListener("drop", async (e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        dragDepth = 0;
+        dropzone.classList.remove("dragover");
+
+        const files = Array.from(e.dataTransfer.files || []);
+        if (!files.length) return;
+
+        try {
+          setDropzoneBusy(true);
+          const paths = files
+            .map((file) => (typeof file.path === "string" ? file.path : ""))
+            .filter(Boolean);
+          const data =
+            paths.length === files.length
+              ? await requestFileInfo(paths)
+              : await uploadDroppedFiles(files);
+
+          if (data.files?.length) addFiles(data.files);
+          else showError(data.error || "No supported video files were added.");
+        } catch (e) {
+          showError("Failed to process dropped files: " + e.message);
+        } finally {
+          setDropzoneBusy(false);
+        }
+      });
+
+      async function requestFileInfo(paths) {
+        const r = await fetch("/file-info", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paths }),
+        });
+        const data = await r.json();
+        if (!r.ok)
+          throw new Error(data.error || "Unable to read dropped files.");
+        return data;
+      }
+
+      async function uploadDroppedFiles(files) {
+        const formData = new FormData();
+        files.forEach((file) => formData.append("files", file, file.name));
+        const r = await fetch("/upload-dropped-files", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await r.json();
+        if (!r.ok)
+          throw new Error(data.error || "Unable to add dropped files.");
+        return data;
+      }
+
+      function setDropzoneBusy(isBusy) {
+        dropzone.classList.toggle("busy", isBusy);
+        dropzone.disabled = isBusy;
+        dropzone.setAttribute("aria-busy", String(isBusy));
+      }
+
+      // Prevent the browser from navigating to a dropped file outside the drop target.
+      document.addEventListener("dragover", (e) => {
+        if (hasFiles(e)) e.preventDefault();
+      });
+      document.addEventListener("drop", (e) => {
+        if (hasFiles(e)) e.preventDefault();
+      });
+
+      function addFiles(newFiles) {
+        // Avoid duplicates by path
+        for (const f of newFiles) {
+          if (!selectedFiles.find((e) => e.path === f.path)) {
+            selectedFiles.push(f);
+          }
+        }
+        renderFileList();
+        hideError();
+      }
+
+      function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        renderFileList();
+      }
+
+      function renderFileList() {
+        const list = document.getElementById("fileList");
+        const controls = document.getElementById("controlsArea");
+        const actions = document.getElementById("selectActions");
+
+        if (selectedFiles.length === 0) {
+          list.innerHTML = "";
+          fileSummary.textContent = "";
+          controls.style.display = "none";
+          actions.style.display = "none";
+          return;
+        }
+
+        controls.style.display = "flex";
+        actions.style.display = "flex";
+        fileSummary.textContent = `${selectedFiles.length} video${selectedFiles.length === 1 ? "" : "s"} ready to compress`;
+
+        list.innerHTML = selectedFiles
+          .map(
+            (f, i) => `
+    <div class="file-item">
+      <div class="file-type" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="m10 9 5 3-5 3V9Z"/></svg></div>
+      <div class="file-info">
+        <div class="file-name">${escHtml(f.name)}</div>
+        <div class="file-meta">
+          <span>${f.size_formatted}</span>
+          ${f.width && f.height ? `<span>${f.width} × ${f.height}</span>` : ""}
+          ${f.duration > 0 ? `<span>${f.duration_formatted}</span>` : ""}
+        </div>
+      </div>
+      <button class="file-remove" type="button" onclick="removeFile(${i})" title="Remove ${escHtml(f.name)}" aria-label="Remove ${escHtml(f.name)}">✕</button>
+    </div>
+  `,
+          )
+          .join("");
+      }
+
+      function escHtml(s) {
+        const d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      /* ── Output Folder ──────────────────────────────────── */
+      async function selectOutputFolder() {
+        try {
+          const r = await fetch("/select-folder", { method: "POST" });
+          const data = await r.json();
+          if (data.folder) {
+            outputDir = data.folder;
+            document.getElementById("outputPath").textContent = data.folder;
+          }
+        } catch (e) {
+          showError("Failed to open folder dialog: " + e.message);
+        }
+      }
+
+      function resetOutputFolder() {
+        outputDir = null;
+        document.getElementById("outputPath").textContent = "Same as source";
+      }
+
+      /* ── Start Compression ──────────────────────────────── */
+      async function startCompression() {
+        if (selectedFiles.length === 0) return;
+        if (selectedFiles.some((file) => file.uploaded) && !outputDir) {
+          showError(
+            "Choose an output folder for dropped files before compressing.",
+          );
+          document.getElementById("outputBrowse").focus();
+          return;
+        }
+        hideError();
+
+        const preset = document.getElementById("preset").value;
+        const filePaths = selectedFiles.map((f) => f.path);
+
+        try {
+          const r = await fetch("/compress", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              files: filePaths,
+              preset: preset,
+              output_dir: outputDir,
+            }),
+          });
+          const data = await r.json();
+
+          if (!r.ok) {
+            showError(data.error || "Failed to start compression.");
+            return;
+          }
+
+          batchId = data.batch_id;
+
+          // Setup progress view
+          setupProgressView();
+          showView("viewProgress");
+
+          // Start polling
+          pollTimer = setInterval(pollProgress, 500);
+          pollProgress();
+        } catch (e) {
+          showError("Failed to start compression: " + e.message);
+        }
+      }
+
+      /* ── Progress Polling ───────────────────────────────── */
+      function setupProgressView() {
+        const total = selectedFiles.length;
+        const batchBar = document.getElementById("batchBar");
+
+        if (total > 1) {
+          batchBar.style.display = "flex";
+          document.getElementById("batchTotal").textContent = total;
+          document.getElementById("batchCurrent").textContent = "1";
+
+          const dots = document.getElementById("batchDots");
+          dots.innerHTML = "";
+          for (let i = 0; i < total; i++) {
+            const dot = document.createElement("div");
+            dot.className = "batch-dot";
+            dot.id = `dot-${i}`;
+            dots.appendChild(dot);
+          }
+        } else {
+          batchBar.style.display = "none";
+        }
+
+        document.getElementById("progressFill").style.width = "0%";
+        document
+          .getElementById("progressBar")
+          .setAttribute("aria-valuenow", "0");
+        document.getElementById("progressPct").textContent = "0%";
+        document.getElementById("statElapsed").textContent = "0s";
+        document.getElementById("statEta").textContent = "Calculating...";
+        document.getElementById("statSpeed").textContent = "—";
+      }
+
+      async function pollProgress() {
+        try {
+          const r = await fetch("/progress");
+          if (!r.ok) return;
+          const data = await r.json();
+
+          const total = data.total_files || 1;
+          const jobs = data.jobs || [];
+
+          // Find the currently active job
+          let activeJob = jobs.find((j) => j.status === "processing");
+          if (!activeJob) activeJob = jobs.find((j) => j.status === "queued");
+          if (!activeJob && jobs.length > 0) activeJob = jobs[jobs.length - 1];
+
+          if (activeJob) {
+            document.getElementById("currentFileName").textContent =
+              activeJob.filename || "Processing...";
+            document.getElementById("currentStage").textContent =
+              activeJob.stage || "Processing";
+
+            const pct = Math.max(0, Math.min(100, activeJob.progress || 0));
+            document.getElementById("progressFill").style.width = pct + "%";
+            document
+              .getElementById("progressBar")
+              .setAttribute("aria-valuenow", pct.toFixed(1));
+            document.getElementById("progressPct").textContent =
+              pct.toFixed(1) + "%";
+            document.getElementById("statElapsed").textContent = formatTime(
+              activeJob.elapsed,
+            );
+            document.getElementById("statEta").textContent =
+              activeJob.status === "done" || activeJob.status === "larger"
+                ? "Done"
+                : formatTime(activeJob.eta);
+            document.getElementById("statSpeed").textContent = activeJob.speed
+              ? activeJob.speed.toFixed(2) + "x"
+              : "—";
+          }
+
+          // Update batch indicators
+          if (total > 1) {
+            const currentIdx = data.current_index || 0;
+            document.getElementById("batchCurrent").textContent = Math.min(
+              currentIdx + 1,
+              total,
+            );
+
+            for (let i = 0; i < jobs.length; i++) {
+              const dot = document.getElementById(`dot-${i}`);
+              if (!dot) continue;
+              dot.className = "batch-dot";
+              const st = jobs[i].status;
+              if (st === "done") dot.classList.add("done");
+              else if (st === "processing") dot.classList.add("active");
+              else if (st === "error" || st === "cancelled")
+                dot.classList.add("error");
+              else if (st === "larger") dot.classList.add("larger");
+            }
+          }
+
+          // Check if all done
+          if (!data.is_running) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+            showResults(data);
+          }
+        } catch (e) {
+          // Network error during poll — just retry next interval
+        }
+      }
+
+      /* ── Cancel ─────────────────────────────────────────── */
+      async function cancelCompression() {
+        try {
+          await fetch("/cancel", { method: "POST" });
+        } catch (e) {
+          // ignore
+        }
+
+        if (pollTimer) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+
+        showView("viewSelect");
+        showError("Compression cancelled.");
+      }
+
+      /* ── Results ────────────────────────────────────────── */
+      function showResults(data) {
+        const jobs = data.jobs || [];
+        let totalOriginal = 0;
+        let totalCompressed = 0;
+        let totalElapsed = 0;
+        let allSuccess = true;
+        let anySuccess = false;
+        let anyCancelled = false;
+
+        for (const j of jobs) {
+          totalOriginal += j.original_size || 0;
+          totalElapsed += j.elapsed || 0;
+          if (j.status === "done") {
+            totalCompressed += j.output_size || 0;
+            anySuccess = true;
+          } else if (j.status === "larger") {
+            totalCompressed += j.original_size || 0;
+            allSuccess = false;
+          } else if (j.status === "cancelled") {
+            anyCancelled = true;
+            allSuccess = false;
+          } else {
+            allSuccess = false;
+          }
+        }
+
+        const saved = totalOriginal > 0 ? totalOriginal - totalCompressed : 0;
+        const savedPct = totalOriginal > 0 ? (saved / totalOriginal) * 100 : 0;
+
+        // Header
+        if (anyCancelled) {
+          document.getElementById("resultTitle").textContent =
+            "Compression Cancelled";
+          document.getElementById("resultSubtitle").textContent =
+            "The batch was cancelled before completing.";
+        } else if (allSuccess) {
+          document.getElementById("resultTitle").textContent =
+            "Compression Complete";
+          document.getElementById("resultSubtitle").textContent =
+            jobs.length === 1
+              ? "Your video has been compressed."
+              : `All ${jobs.length} files processed.`;
+        } else {
+          document.getElementById("resultTitle").textContent =
+            "Processing Complete";
+          document.getElementById("resultSubtitle").textContent =
+            "Some files could not be reduced further.";
+        }
+
+        // Summary stats
+        document.getElementById("resultOriginal").textContent =
+          formatSize(totalOriginal);
+        document.getElementById("resultCompressed").textContent =
+          formatSize(totalCompressed);
+        document.getElementById("resultSaved").textContent =
+          saved > 0 ? `${formatSize(saved)} (${savedPct.toFixed(1)}%)` : "None";
+        document.getElementById("resultTime").textContent =
+          formatTime(totalElapsed);
+
+        // Per-file results
+        const filesHtml = jobs
+          .map((j) => {
+            let badge = "";
+            let sizes = "";
+            if (j.status === "done") {
+              badge = `<span class="result-file-badge success">-${Number(j.saved || 0).toFixed(1)}%</span>`;
+              sizes = `${formatSize(j.original_size)} → ${formatSize(j.output_size)}`;
+            } else if (j.status === "larger") {
+              badge = `<span class="result-file-badge kept">Original kept</span>`;
+              sizes = formatSize(j.original_size);
+            } else if (j.status === "cancelled") {
+              badge = `<span class="result-file-badge error">Cancelled</span>`;
+              sizes = formatSize(j.original_size);
+            } else {
+              badge = `<span class="result-file-badge error">Error</span>`;
+              sizes = formatSize(j.original_size);
+            }
+
+            return `
+      <div class="result-file">
+        <div class="result-file-name">${escHtml(j.filename)}</div>
+        <div class="result-file-sizes">${sizes}</div>
+        ${badge}
+      </div>
+    `;
+          })
+          .join("");
+
+        document.getElementById("resultFiles").innerHTML = filesHtml;
+
+        showView("viewResult");
+      }
+
+      /* ── Open Output Folder ─────────────────────────────── */
+      async function openOutputFolder() {
+        // Use the output path from the first successful job, or fall back to output_dir or source dir
+        let folderPath = outputDir;
+        try {
+          const r = await fetch("/progress");
+          if (r.ok) {
+            const data = await r.json();
+            const jobs = data.jobs || [];
+            for (const j of jobs) {
+              if (j.output_path) {
+                folderPath = j.output_path;
+                break;
+              }
+            }
+          }
+        } catch (e) {}
+
+        if (!folderPath) {
+          // Fall back to first selected file's directory
+          if (selectedFiles.length > 0) {
+            folderPath = selectedFiles[0].path;
+          }
+        }
+
+        if (folderPath) {
+          try {
+            await fetch("/open-folder", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ path: folderPath }),
+            });
+          } catch (e) {}
+        }
+      }
+
+      /* ── Compress More ──────────────────────────────────── */
+      function compressMore() {
+        selectedFiles = [];
+        outputDir = null;
+        batchId = null;
+        document.getElementById("outputPath").textContent = "Same as source";
+        renderFileList();
+        hideError();
+        showView("viewSelect");
+      }
+
+      /* ── FFmpeg Check on Load ───────────────────────────── */
+      async function checkFfmpeg() {
+        try {
+          const r = await fetch("/check-ffmpeg");
+          const data = await r.json();
+          if (!data.ffmpeg || !data.ffprobe) {
+            document.getElementById("ffmpegWarn").classList.add("visible");
+          }
+        } catch (e) {
+          // Server not ready yet, retry
+          setTimeout(checkFfmpeg, 500);
+        }
+      }
+
+      // Check after a brief delay to let Flask start
+      setTimeout(checkFfmpeg, 300);
+    </script>
+  </body>
+</html>

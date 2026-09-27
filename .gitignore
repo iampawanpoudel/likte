@@ -1,0 +1,44 @@
+__pycache__
+# Build output
+build/
+dist/
+
+# PyInstaller
+*.spec.bak
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# FFmpeg binaries
+ffmpeg/Windows/ffmpeg.exe
+ffmpeg/Windows/ffprobe.exe
+ffmpeg/macOS/ffmpeg
+ffmpeg/macOS/ffprobe
+ffmpeg/Linux/ffmpeg
+ffmpeg/Linux/ffprobe
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+
+#cache
+__pycache__
