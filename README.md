@@ -1,4 +1,4 @@
-# Likte
+# Likte (लिक्ते)
 
 A cross-platform desktop application for reducing video file size while maintaining good visual quality. Built with Python, PyWebView, Flask, and FFmpeg.
 
