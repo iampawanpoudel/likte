@@ -1,6 +1,11 @@
 # Likte (लिक्ते)
 
-A cross-platform desktop application for reducing video file size while maintaining good visual quality. Built with Python, PyWebView, Flask, and FFmpeg.
+A cross-platform desktop application for reducing video file size while maintaining good visual quality. Built with Python, PyWebView, Flask, and FFmpeg. <br><br>
+<a href="https://github.com/iampawanpoudel/likte/releases/download/v1/Likte-Setup-1.0.0.exe">
+  <img src="https://img.shields.io/badge/Download-Windows%20Installer-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows Installer">
+</a>
+ <br><br>
+<img width="1600" height="1056" alt="likte" src="https://github.com/user-attachments/assets/a100dcb5-d9af-46a6-81b5-20ab85e5851b" />
 
 ## Features
 
